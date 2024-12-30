@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 //TODO: MAKE SURE TO VALIDATE FIRST INPUT ON FIRST CLICK/TICK AND THEN START WINDOWS
+//TODO: ADD WINDOW COUNT TO KEEP TRACK OF WHAT HOW MANY INPUTS HAVE BEEN REGISTERED
 
 public class InputReader {
     private static final int INACTIVE_WINDOW = 2;
@@ -43,6 +44,7 @@ public class InputReader {
     private Input currentInput;
     private Input prevInput;
     private Input firstInput;
+    private int inputId = 0;
 
     public InputReader(Minecraft minecraft) {
         this.minecraft = minecraft;
@@ -55,7 +57,7 @@ public class InputReader {
     }
 
     public void tick() {
-        if (playerPatch.getSkill(KombatSlots.FIGHTER) == null)
+        if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
             return;
 
         int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
@@ -66,18 +68,19 @@ public class InputReader {
                 this.activeWindow = false;
 
             this.updateInputs(false);
-            if (!this.activeWindow) {
+            boolean flag = this.initString && this.tickSinceLastInput == 1;
+            if (!this.activeWindow || flag) {
                 if (this.firstInput.isEmpty())
                     this.firstInput = this.createString();
 
-                if (this.tickSinceLastInput == 3 || (this.initString && this.tickSinceLastInput == 1)) {
+                if (this.tickSinceLastInput == 3 || flag) {
                     this.updateString();
 
                     int size = this.currentInput.size();
                     if (!this.firstInput.isMovement()) {
                         //Basic Attack Logic
                     } else {
-                        if (size >= 3)
+                        if (this.inputId > 2)
                             this.handleMovementInputs();
                     }
 
@@ -85,6 +88,9 @@ public class InputReader {
                         this.reset(true);
                         return;
                     }
+
+                    if (flag)
+                        this.reset();
                 }
             }
 
@@ -100,8 +106,9 @@ public class InputReader {
         }
 
         this.validateInputs();
-        Constants.LOG.debug("{}", this.tickSinceLastInput);
-        Constants.LOG.debug("{}", this.directionalInputs);
+//        Constants.LOG.debug("{}", this.tickSinceLastInput);
+//        Constants.LOG.debug("{}", this.currentInput);
+        Constants.LOG.debug("{}", this.inputId);
     }
 
     private void handleMovementInputs() {
@@ -163,8 +170,10 @@ public class InputReader {
         Input input = this.createString();
         if (this.currentInput.canAppend(input)) {
             this.currentInput = this.currentInput.append(input);
-            if (!input.isEmpty())
+            if (!input.isEmpty()) {
                 playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
+                this.inputId++;
+            }
         } else {
             this.currentInput.clear();
         }
@@ -200,7 +209,7 @@ public class InputReader {
     private void pressKey(KeyMapping key, Input input, boolean performSkill, boolean startWindow) {
         boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
         while (keyPressed(key)) {
-            Constants.LOG.debug("{}", this.tickSinceLastInput);
+            Constants.LOG.debug("{}: {}", input.getInput(), this.tickSinceLastInput);
 
             int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
             if (this.tickSinceLastInput >= 3)
@@ -280,6 +289,7 @@ public class InputReader {
         if (hardReset) {
             this.tickWindows = false;
             this.clearStrings();
+            this.inputId = 0;
             //Reset Cache
         }
     }
