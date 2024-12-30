@@ -25,6 +25,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+//TODO: MAKE SURE TO VALIDATE FIRST INPUT ON FIRST CLICK/TICK AND THEN START WINDOWS
+
 public class InputReader {
     private static final int INACTIVE_WINDOW = 2;
     private static final List<KeyMapping> COMBAT_MAPPINGS = Lists.newArrayList();
@@ -37,6 +39,7 @@ public class InputReader {
     private boolean tickWindows;
     public int tickSinceLastInput = 0;
     private boolean activeWindow;
+    private boolean initString;
     private Input currentInput;
     private Input prevInput;
     private Input firstInput;
@@ -67,17 +70,10 @@ public class InputReader {
                 if (this.firstInput.isEmpty())
                     this.firstInput = this.createString();
 
-                if (this.tickSinceLastInput == 3) {
-                    Input input = this.createString();
-                    if (this.currentInput.canAppend(input)) {
-                        this.currentInput = this.currentInput.append(input);
-                        if (!input.isEmpty())
-                            playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
-                    } else {
-                        this.currentInput.clear();
-                    }
+                if (this.tickSinceLastInput == 3 || (this.initString && this.tickSinceLastInput == 1)) {
+                    this.updateString();
 
-                    int size = !currentInput.isEmpty() ? this.currentInput.size() : 0;
+                    int size = this.currentInput.size();
                     if (!this.firstInput.isMovement()) {
                         //Basic Attack Logic
                     } else {
@@ -86,7 +82,7 @@ public class InputReader {
                     }
 
                     if (this.currentInput.isEmpty() || this.currentInput.equals(this.prevInput)) {
-                        this.currentInput.clear();
+                        this.reset(true);
                         return;
                     }
                 }
@@ -102,7 +98,10 @@ public class InputReader {
         } else {
             this.updateInputs(true);
         }
-//        Constants.LOG.debug("{}", this.tickSinceLastInput);
+
+        this.validateInputs();
+        Constants.LOG.debug("{}", this.tickSinceLastInput);
+        Constants.LOG.debug("{}", this.directionalInputs);
     }
 
     private void handleMovementInputs() {
@@ -144,7 +143,7 @@ public class InputReader {
         }
 
         if (!foundMatch)
-            this.currentInput.clear();
+            this.reset(true);
     }
 
     private Input createString() {
@@ -169,6 +168,7 @@ public class InputReader {
         } else {
             this.currentInput.clear();
         }
+        this.initString = false;
     }
 
     private void updateInputs(boolean startString) {
@@ -200,6 +200,8 @@ public class InputReader {
     private void pressKey(KeyMapping key, Input input, boolean performSkill, boolean startWindow) {
         boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
         while (keyPressed(key)) {
+            Constants.LOG.debug("{}", this.tickSinceLastInput);
+
             int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
             if (this.tickSinceLastInput >= 3)
                 this.reset(true);
@@ -207,6 +209,7 @@ public class InputReader {
             if (startWindow && flag) {
                 this.tickWindows = true;
                 this.activeWindow = true;
+                this.initString = true;
             }
 
             if (!flag) break;
@@ -254,6 +257,13 @@ public class InputReader {
             this.directionalInputs.add(input);
     }
 
+    private void validateInputs() {
+        if (!this.tickWindows && (!this.firstInput.isEmpty() || !this.currentInput.isEmpty() || !this.directionalInputs.isEmpty() || !this.attackInputs.isEmpty())) {
+            this.clearInputs();
+            this.clearStrings();
+        }
+    }
+
     private void reset() {
         if (!this.attackInputs.isEmpty()) {
             for (KeyMapping key : COMBAT_MAPPINGS) {
@@ -261,8 +271,7 @@ public class InputReader {
             }
         }
 
-        this.attackInputs.clear();
-        this.directionalInputs.clear();
+        this.clearInputs();
         this.tickSinceLastInput = 0;
     }
 
@@ -270,12 +279,17 @@ public class InputReader {
         this.reset();
         if (hardReset) {
             this.tickWindows = false;
-            this.clearInputs();
+            this.clearStrings();
             //Reset Cache
         }
     }
 
     private void clearInputs() {
+        this.directionalInputs.clear();
+        this.attackInputs.clear();
+    }
+
+    private void clearStrings() {
         this.currentInput.clear();
         this.prevInput.clear();
         this.firstInput.clear();
