@@ -50,7 +50,6 @@ public class InputReader {
     }
 
     public void tick() {
-//        this.tickSinceLastInput = 0;
         if (playerPatch.getSkill(KombatSlots.FIGHTER) == null)
             return;
 
@@ -58,7 +57,7 @@ public class InputReader {
         if (this.tickWindows) {
             this.tickSinceLastInput++;
 
-            if (this.tickSinceLastInput <= 3)
+            if (this.tickSinceLastInput >= 3)
                 this.activeWindow = false;
 
             this.updateInputs(false);
@@ -66,7 +65,7 @@ public class InputReader {
                 if (this.firstInput == null)
                     this.firstInput = this.createString();
 
-                if (this.tickSinceLastInput == 4) {
+                if (this.tickSinceLastInput == 3) {
                     Input input = this.createString();
                     if (currentInput == null)
                         this.currentInput = new Input();
@@ -94,7 +93,7 @@ public class InputReader {
                 }
             }
 
-            if (this.tickSinceLastInput > 4) {
+            if (this.tickSinceLastInput >= 4) {
                 if (this.currentInput != null) {
                     this.activeWindow = true;
                     this.prevInput = this.currentInput;
@@ -104,7 +103,7 @@ public class InputReader {
         } else {
             this.updateInputs(true);
         }
-        Constants.LOG.debug("{}", this.tickSinceLastInput);
+//        Constants.LOG.debug("{}", this.tickSinceLastInput);
     }
 
     private void handleMovementInputs() {
@@ -192,7 +191,7 @@ public class InputReader {
         boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
         while (keyPressed(key)) {
             int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
-            if (this.tickSinceLastInput < 3)
+            if (this.tickSinceLastInput >= 3)
                 this.reset(true);
 
             if (startWindow && flag) {
@@ -232,7 +231,7 @@ public class InputReader {
     }
 
     private void addAttackInput(Input input) {
-        if (this.attackInputs.size() < 3) return;
+        if (this.attackInputs.size() >= 2) return;
         this.attackInputs.add(input);
     }
 
@@ -246,7 +245,6 @@ public class InputReader {
     }
 
     private void reset() {
-        Constants.LOG.debug("{}", this.tickSinceLastInput);
         if (!this.attackInputs.isEmpty()) {
             for (KeyMapping key : COMBAT_MAPPINGS) {
                 key.release();
