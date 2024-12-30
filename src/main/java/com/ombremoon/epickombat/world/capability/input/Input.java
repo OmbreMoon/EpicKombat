@@ -18,8 +18,8 @@ public class Input {
     public static final Input FK = new Input("3", false);
     public static final Input BK = new Input("4", false);
 
-    private final String input;
-    private final boolean isMovement;
+    private String input;
+    private boolean isMovement;
     private int size = 1;
 
     Input(String input, boolean isMovement) {
@@ -80,7 +80,21 @@ public class Input {
         return this.size;
     }
 
-    public static boolean isOppositeOf(Input input, Input other) {
+    public boolean isEmpty() {
+        return this.size == 0;
+    }
+
+    public void clear() {
+        this.input = "";
+        this.isMovement = true;
+        this.size = 0;
+    }
+
+    public boolean isOpposite(Input input) {
+        return isOppositeOf(this, input);
+    }
+
+    private static boolean isOppositeOf(Input input, Input other) {
         return (input == Input.W && other == Input.S) || (input == Input.A && other == Input.D) || (input == Input.JUMP && other == Input.CROUCH)
                 || (input == Input.S && other == Input.W) || (input == Input.D && other == Input.A) || (input == Input.CROUCH && other == Input.JUMP);
     }
@@ -126,7 +140,7 @@ public class Input {
     public enum Timing {
         SHORT(2),
         MEDIUM(3),
-        LONG(5);
+        LONG(4);
 
         int duration;
 

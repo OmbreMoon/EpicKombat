@@ -24,10 +24,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class InputReader {
-    private static final int INPUT_DURATION = 6;
+    private static final int INACTIVE_WINDOW = 2;
     private static final List<KeyMapping> COMBAT_MAPPINGS = Lists.newArrayList();
     private final Minecraft minecraft;
     private final LocalPlayerPatch playerPatch;
@@ -46,6 +45,9 @@ public class InputReader {
         this.minecraft = minecraft;
         this.playerPatch = EpicFightCapabilities.getEntityPatch(minecraft.player, LocalPlayerPatch.class);
         this.engine = ClientEngine.getInstance().controllEngine;
+        this.currentInput = new Input();
+        this.prevInput = new Input();
+        this.firstInput = new Input();
 //        this.cache = new InputCache();
     }
 
@@ -62,23 +64,20 @@ public class InputReader {
 
             this.updateInputs(false);
             if (!this.activeWindow) {
-                if (this.firstInput == null)
+                if (this.firstInput.isEmpty())
                     this.firstInput = this.createString();
 
                 if (this.tickSinceLastInput == 3) {
                     Input input = this.createString();
-                    if (currentInput == null)
-                        this.currentInput = new Input();
-
                     if (this.currentInput.canAppend(input)) {
                         this.currentInput = this.currentInput.append(input);
-                        if (input.size() > 0)
+                        if (!input.isEmpty())
                             playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
                     } else {
-                        this.currentInput = null;
+                        this.currentInput.clear();
                     }
 
-                    int size = this.currentInput != null ? this.currentInput.size() : 0;
+                    int size = !currentInput.isEmpty() ? this.currentInput.size() : 0;
                     if (!this.firstInput.isMovement()) {
                         //Basic Attack Logic
                     } else {
@@ -86,15 +85,15 @@ public class InputReader {
                             this.handleMovementInputs();
                     }
 
-                    if (this.currentInput == null || this.currentInput.equals(this.prevInput)) {
-                        this.currentInput = null;
+                    if (this.currentInput.isEmpty() || this.currentInput.equals(this.prevInput)) {
+                        this.currentInput.clear();
                         return;
                     }
                 }
             }
 
             if (this.tickSinceLastInput >= 4) {
-                if (this.currentInput != null) {
+                if (!this.currentInput.isEmpty()) {
                     this.activeWindow = true;
                     this.prevInput = this.currentInput;
                 }
@@ -126,12 +125,12 @@ public class InputReader {
                     engine.lockHotkeys();
 
                 foundMatch = true;
-                this.currentInput = null;
+                this.currentInput.clear();
                 break;
             }
         }
 
-        if (!foundMatch && this.currentInput != null) {
+        if (!foundMatch && !this.currentInput.isEmpty()) {
             for (SkillCombo combo : combos) {
                 Input comboInput = this.firstInput.append(combo.inputs());
                 if (this.currentInput.isPartialMatch(comboInput)) {
@@ -145,7 +144,7 @@ public class InputReader {
         }
 
         if (!foundMatch)
-            this.currentInput = null;
+            this.currentInput.clear();
     }
 
     private Input createString() {
@@ -159,6 +158,17 @@ public class InputReader {
 
         String s = Input.sortString(input.getInput());
         return new Input(s, input.isMovement(), input.size());
+    }
+
+    private void updateString() {
+        Input input = this.createString();
+        if (this.currentInput.canAppend(input)) {
+            this.currentInput = this.currentInput.append(input);
+            if (!input.isEmpty())
+                playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
+        } else {
+            this.currentInput.clear();
+        }
     }
 
     private void updateInputs(boolean startString) {
@@ -237,7 +247,7 @@ public class InputReader {
 
     private void addDirectionalInput(Input input) {
         List<Input> inputs = Lists.newArrayList(this.directionalInputs);
-        if (inputs.size() == 1 && Input.isOppositeOf(inputs.get(0), input))
+        if (inputs.size() == 1 && input.isOpposite(inputs.get(0)))
             this.directionalInputs.clear();
 
         if (this.directionalInputs.size() < 2)
@@ -260,11 +270,15 @@ public class InputReader {
         this.reset();
         if (hardReset) {
             this.tickWindows = false;
-            this.currentInput = null;
-            this.prevInput = null;
-            this.firstInput = null;
+            this.clearInputs();
             //Reset Cache
         }
+    }
+
+    private void clearInputs() {
+        this.currentInput.clear();
+        this.prevInput.clear();
+        this.firstInput.clear();
     }
 
     public boolean isWindowActive() {
