@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.ombremoon.epickombat.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "epickombat.refmap.json",
+  "mixins": [
+    "SkillManagerMixin"
+  ],
+  "client": [
+    "ControllEngineMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
