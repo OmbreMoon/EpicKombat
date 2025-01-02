@@ -27,7 +27,6 @@ public class SpecialSkill extends Skill {
     }
 
     public boolean canExecute(PlayerPatch<?> executer) {
-        Constants.LOG.debug("{}", executer.isLogicalClient());
         if (executer.isLogicalClient()) {
             return super.canExecute(executer);
         } else {

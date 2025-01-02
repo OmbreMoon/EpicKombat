@@ -1,7 +1,6 @@
 package com.ombremoon.epickombat.world.capability;
 
 import com.ombremoon.epickombat.gameasset.EpicKombatSkills;
-import com.ombremoon.epickombat.main.Constants;
 import com.ombremoon.epickombat.networking.NetworkManager;
 import com.ombremoon.epickombat.networking.server.ServerboundChangeSkill;
 import com.ombremoon.epickombat.skill.KombatSlots;
@@ -12,7 +11,6 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
@@ -20,7 +18,7 @@ public class KombatKapability {
     protected Player player;
     protected PlayerPatch<?> playerPatch;
     protected boolean initialized = false;
-    protected FighterInfo info;
+    protected Fighter fighter;
     private InputReader inputReader;
 
     public KombatKapability() {
@@ -86,12 +84,12 @@ public class KombatKapability {
         return this.initialized;
     }
 
-    public FighterInfo getFighterInfo() {
-        return this.info;
+    public Fighter getFighter() {
+        return this.fighter;
     }
 
-    public void setFighterInfo(FighterInfo info) {
-        this.info = info;
+    public void setFighter(Fighter fighter) {
+        this.fighter = fighter;
     }
 
     public InputReader getInputs() {

@@ -15,9 +15,9 @@ import net.minecraftforge.fml.ModLoader;
 
 import java.util.Map;
 
-public class FighterInfoReloadListener extends SimpleJsonResourceReloadListener {
+public class FighterReloadListener extends SimpleJsonResourceReloadListener {
     public static void registerDefaultFighters() {
-        Map<ResourceLocation, FighterInfo.Builder> map = Maps.newHashMap();
+        Map<ResourceLocation, Fighter.Builder> map = Maps.newHashMap();
         map.put(CommonClass.customLocation("liu_kang"), FighterPresets.LIU_KANG);
         map.put(CommonClass.customLocation("scorpion"), FighterPresets.SCORPION);
         map.put(CommonClass.customLocation("sub_zero"), FighterPresets.SUB_ZERO);
@@ -30,10 +30,10 @@ public class FighterInfoReloadListener extends SimpleJsonResourceReloadListener 
     public static final String DIRECTORY = "capabilities/fighters";
 
     private static final Gson GSON = (new GsonBuilder()).create();
-    private static final Map<ResourceLocation, FighterInfo.Builder> PRESETS = Maps.newHashMap();
+    private static final Map<ResourceLocation, Fighter.Builder> PRESETS = Maps.newHashMap();
     private static final Map<ResourceLocation, CompoundTag> TAGMAP = Maps.newHashMap();
 
-    public FighterInfoReloadListener() {
+    public FighterReloadListener() {
         super(GSON, DIRECTORY);
     }
 
@@ -42,7 +42,7 @@ public class FighterInfoReloadListener extends SimpleJsonResourceReloadListener 
 
     }
 
-    public static FighterInfo.Builder getOrThrow(ResourceLocation fighterName) {
+    public static Fighter.Builder getOrThrow(ResourceLocation fighterName) {
         if (!PRESETS.containsKey(fighterName)) {
             throw new IllegalArgumentException("Can't find fighter: " + fighterName);
         }
@@ -50,15 +50,15 @@ public class FighterInfoReloadListener extends SimpleJsonResourceReloadListener 
         return PRESETS.get(fighterName);
     }
 
-    public static FighterInfo.Builder getOrThrow(String fighterName) {
+    public static Fighter.Builder getOrThrow(String fighterName) {
         return getOrThrow(ResourceLocation.tryParse(fighterName));
     }
 
-    public static FighterInfo.Builder get(ResourceLocation fighterName) {
+    public static Fighter.Builder get(ResourceLocation fighterName) {
         return PRESETS.get(fighterName);
     }
 
-    public static FighterInfo.Builder get(String fighterName) {
+    public static Fighter.Builder get(String fighterName) {
         return get(ResourceLocation.tryParse(fighterName));
     }
 }

@@ -3,8 +3,8 @@ package com.ombremoon.epickombat.skill.fighter;
 import com.ombremoon.epickombat.main.CommonClass;
 import com.ombremoon.epickombat.skill.KombatCategories;
 import com.ombremoon.epickombat.util.KombatUtil;
-import com.ombremoon.epickombat.world.capability.FighterInfo;
-import com.ombremoon.epickombat.world.capability.FighterInfoReloadListener;
+import com.ombremoon.epickombat.world.capability.Fighter;
+import com.ombremoon.epickombat.world.capability.FighterReloadListener;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -29,14 +29,14 @@ public abstract class FighterSkill extends Skill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
         var kombat = KombatUtil.getKombat(container.getExecuter().getOriginal());
-        kombat.setFighterInfo(this.getFighterInfo());
+        kombat.setFighter(this.getFighter());
     }
 
     @Override
     public void onRemoved(SkillContainer container) {
         super.onRemoved(container);
         var kombat = KombatUtil.getKombat(container.getExecuter().getOriginal());
-        kombat.setFighterInfo(FighterInfo.EMPTY);
+        kombat.setFighter(Fighter.EMPTY);
     }
 
     @Override
@@ -44,8 +44,8 @@ public abstract class FighterSkill extends Skill {
         super.drawOnGui(gui, container, guiGraphics, x, y);
     }
 
-    public FighterInfo getFighterInfo() {
-        return FighterInfoReloadListener.getOrThrow(this.fighterName).build();
+    public Fighter getFighter() {
+        return FighterReloadListener.getOrThrow(this.fighterName).build();
     }
 
     public static class Builder extends Skill.Builder<FighterSkill> {
@@ -55,7 +55,7 @@ public abstract class FighterSkill extends Skill {
             this.fighterName = CommonClass.customLocation("");
         }
 
-        public Builder setFighterInfo(ResourceLocation fighterName) {
+        public Builder setFighter(ResourceLocation fighterName) {
             this.fighterName = fighterName;
             return this;
         }

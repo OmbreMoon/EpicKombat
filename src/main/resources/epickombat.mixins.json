@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "epickombat.refmap.json",
   "mixins": [
+    "ServerPlayerPatchMixin",
     "SkillManagerMixin"
   ],
   "client": [

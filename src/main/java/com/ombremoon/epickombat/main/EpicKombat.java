@@ -5,7 +5,7 @@ import com.ombremoon.epickombat.init.EpicKombatItems;
 import com.ombremoon.epickombat.networking.NetworkManager;
 import com.ombremoon.epickombat.skill.KombatCategories;
 import com.ombremoon.epickombat.skill.KombatSlots;
-import com.ombremoon.epickombat.world.capability.FighterInfoReloadListener;
+import com.ombremoon.epickombat.world.capability.FighterReloadListener;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -34,7 +34,7 @@ public class EpicKombat {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        event.enqueueWork(FighterInfoReloadListener::registerDefaultFighters);
+        event.enqueueWork(FighterReloadListener::registerDefaultFighters);
         event.enqueueWork(NetworkManager::registerPackets);
     }
 }

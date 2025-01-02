@@ -25,16 +25,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-//TODO: MAKE SURE TO VALIDATE FIRST INPUT ON FIRST CLICK/TICK AND THEN START WINDOWS
-//TODO: ADD WINDOW COUNT TO KEEP TRACK OF WHAT HOW MANY INPUTS HAVE BEEN REGISTERED
-
 public class InputReader {
-    private static final int INACTIVE_WINDOW = 2;
     private static final List<KeyMapping> COMBAT_MAPPINGS = Lists.newArrayList();
     private final Minecraft minecraft;
     private final LocalPlayerPatch playerPatch;
     private final ControllEngine engine;
-//    public final InputCache cache;
+    public final InputCache cache;
     private final List<Input> attackInputs = new ObjectArrayList<>();
     private final Set<Input> directionalInputs = new LinkedHashSet<>();
     private boolean tickWindows;
@@ -44,16 +40,17 @@ public class InputReader {
     private Input currentInput;
     private Input prevInput;
     private Input firstInput;
+    private int inputTimer;
     private int inputId = 0;
 
     public InputReader(Minecraft minecraft) {
         this.minecraft = minecraft;
         this.playerPatch = EpicFightCapabilities.getEntityPatch(minecraft.player, LocalPlayerPatch.class);
         this.engine = ClientEngine.getInstance().controllEngine;
+        this.cache = new InputCache(playerPatch);
         this.currentInput = new Input();
         this.prevInput = new Input();
         this.firstInput = new Input();
-//        this.cache = new InputCache();
     }
 
     public void tick() {
@@ -64,37 +61,52 @@ public class InputReader {
         if (this.tickWindows) {
             this.tickSinceLastInput++;
 
-            if (this.tickSinceLastInput >= 3)
+            if (this.tickSinceLastInput >= timing)
                 this.activeWindow = false;
 
-            this.updateInputs(false);
             boolean flag = this.initString && this.tickSinceLastInput == 1;
             if (!this.activeWindow || flag) {
                 if (this.firstInput.isEmpty())
                     this.firstInput = this.createString();
 
-                if (this.tickSinceLastInput == 3 || flag) {
+                if (this.firstInput.equals(Input.W) || this.firstInput.equals(Input.S)) {
+                    this.reset(true);
+                    return;
+                }
+
+                if (this.tickSinceLastInput == timing || flag) {
                     this.updateString();
 
-                    int size = this.currentInput.size();
                     if (!this.firstInput.isMovement()) {
-                        //Basic Attack Logic
+                        if (this.inputId < 2 && !this.prevInput.equals(this.currentInput)) {
+                            if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, engine).isExecutable())
+                                playerPatch.getOriginal().resetAttackStrengthTicker();
+
+                            engine.lockHotkeys();
+                        }
                     } else {
                         if (this.inputId > 2)
                             this.handleMovementInputs();
                     }
 
+                    Constants.LOG.debug("Input: {}", this.currentInput.isEmpty());
                     if (this.currentInput.isEmpty() || this.currentInput.equals(this.prevInput)) {
                         this.reset(true);
                         return;
                     }
 
-                    if (flag)
+
+                    if (flag) {
+                        this.prevInput = this.currentInput;
+                        this.activeWindow = true;
                         this.reset();
+                    }
                 }
+            } else {
+                this.updateInputs(false);
             }
 
-            if (this.tickSinceLastInput >= 4) {
+            if (this.tickSinceLastInput >= timing + 1) {
                 if (!this.currentInput.isEmpty()) {
                     this.activeWindow = true;
                     this.prevInput = this.currentInput;
@@ -106,9 +118,6 @@ public class InputReader {
         }
 
         this.validateInputs();
-//        Constants.LOG.debug("{}", this.tickSinceLastInput);
-//        Constants.LOG.debug("{}", this.currentInput);
-        Constants.LOG.debug("{}", this.inputId);
     }
 
     private void handleMovementInputs() {
@@ -117,7 +126,7 @@ public class InputReader {
 
         Constants.LOG.debug("{}", this.currentInput);
         if (this.currentInput.getInput().equalsIgnoreCase("cccc")) {
-            playerPatch.playAnimationClientPreemptive(kombat.getFighterInfo().getTaunt(playerPatch.getOriginal()), 0.0F);
+            playerPatch.playAnimationClientPreemptive(kombat.getFighter().getTaunt(playerPatch.getOriginal()), 0.0F);
             this.reset(true);
         }
 
@@ -132,6 +141,7 @@ public class InputReader {
 
                 foundMatch = true;
                 this.currentInput.clear();
+                this.cache.clearCache();
                 break;
             }
         }
@@ -168,12 +178,11 @@ public class InputReader {
 
     private void updateString() {
         Input input = this.createString();
-        if (this.currentInput.canAppend(input)) {
+        if (this.currentInput.canAppend(input) && !input.isEmpty()) {
             this.currentInput = this.currentInput.append(input);
-            if (!input.isEmpty()) {
-                playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
-                this.inputId++;
-            }
+            this.cache.cacheInput(input);
+            playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
+            this.inputId++;
         } else {
             this.currentInput.clear();
         }
@@ -182,16 +191,16 @@ public class InputReader {
 
     private void updateInputs(boolean startString) {
         Options options = this.minecraft.options;
-        pressKey(KeyBinds.FRONT_PUNCH_BINDING, Input.FP, startString, startString);
-        pressKey(KeyBinds.BACK_PUNCH_BINDING, Input.BP, startString, startString);
-        pressKey(KeyBinds.FRONT_KICK_BINDING, Input.FK, startString, startString);
-        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString, startString);
-        pressKey(options.keyUp, Input.W, false, startString);
-        pressKey(options.keyLeft, Input.A, false, startString);
-        pressKey(options.keyDown, Input.S, false, startString);
-        pressKey(options.keyRight, Input.D, false, startString);
-        pressKey(options.keyJump, Input.JUMP, false, startString);
-        pressKey(options.keyShift, Input.CROUCH, false, startString);
+        pressKey(KeyBinds.FRONT_PUNCH_BINDING, Input.FP, startString);
+        pressKey(KeyBinds.BACK_PUNCH_BINDING, Input.BP, startString);
+        pressKey(KeyBinds.FRONT_KICK_BINDING, Input.FK, startString);
+        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString);
+        pressKey(options.keyUp, Input.W, startString);
+        pressKey(options.keyLeft, Input.A, startString);
+        pressKey(options.keyDown, Input.S, startString);
+        pressKey(options.keyRight, Input.D, startString);
+        pressKey(options.keyJump, Input.JUMP, startString);
+        pressKey(options.keyShift, Input.CROUCH, startString);
     }
 
     private boolean isHeldInput(List<Input> inputs) {
@@ -199,20 +208,16 @@ public class InputReader {
     }
 
     public void pressKey(KeyMapping key, Input input) {
-        this.pressKey(key, input, true, false);
+        this.pressKey(key, input, false);
     }
 
-    public void pressKey(KeyMapping key, Input input, boolean startWindow) {
-        this.pressKey(key, input, true, startWindow);
-    }
-
-    private void pressKey(KeyMapping key, Input input, boolean performSkill, boolean startWindow) {
+    private void pressKey(KeyMapping key, Input input, boolean startWindow) {
         boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
         while (keyPressed(key)) {
-            Constants.LOG.debug("{}: {}", input.getInput(), this.tickSinceLastInput);
+//            Constants.LOG.debug("{}", this.tickSinceLastInput);
 
             int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
-            if (this.tickSinceLastInput >= 3)
+            if (this.tickSinceLastInput >= timing)
                 this.reset(true);
 
             if (startWindow && flag) {
@@ -223,16 +228,10 @@ public class InputReader {
 
             if (!flag) break;
 
-            if (performSkill && !input.isMovement()) {
-                if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, engine).isExecutable())
-                    playerPatch.getOriginal().resetAttackStrengthTicker();
-
-                engine.lockHotkeys();
-                this.addAttackInput(input);
-            } else if (!input.isMovement()) {
-                this.addAttackInput(input);
-            } else {
+            if (input.isMovement()) {
                 this.addDirectionalInput(input);
+            } else {
+                this.addAttackInput(input);
             }
         }
     }
@@ -290,7 +289,6 @@ public class InputReader {
             this.tickWindows = false;
             this.clearStrings();
             this.inputId = 0;
-            //Reset Cache
         }
     }
 
@@ -307,6 +305,10 @@ public class InputReader {
 
     public boolean isWindowActive() {
         return this.activeWindow;
+    }
+
+    public InputCache getCache() {
+        return this.cache;
     }
 
     public Input getCurrentInput() {

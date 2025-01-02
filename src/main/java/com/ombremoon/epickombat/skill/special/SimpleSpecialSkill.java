@@ -4,6 +4,7 @@ import com.ombremoon.epickombat.skill.KombatCategories;
 import net.minecraft.network.FriendlyByteBuf;
 import yesman.epicfight.api.animation.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;

@@ -1,9 +1,8 @@
 package com.ombremoon.epickombat.util;
 
-import com.ombremoon.epickombat.world.capability.FighterInfo;
+import com.ombremoon.epickombat.world.capability.Fighter;
 import com.ombremoon.epickombat.world.capability.KombatKapability;
 import com.ombremoon.epickombat.world.capability.KombatKapabilityProvider;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 
 public class KombatUtil {
@@ -13,11 +12,11 @@ public class KombatUtil {
     }
 
     public static boolean hasFighterWeapon(Player player) {
-        FighterInfo fighter = getKombat(player).getFighterInfo();
+        Fighter fighter = getKombat(player).getFighter();
         return (fighter.requiresWeaponToFight() && player.getMainHandItem().is(fighter.getRequiredWeapon())) || (!fighter.requiresWeaponToFight() && player.getMainHandItem().isEmpty());
     }
 
-    public static FighterInfo getFighter(Player player) {
-        return getKombat(player).getFighterInfo();
+    public static Fighter getFighter(Player player) {
+        return getKombat(player).getFighter();
     }
 }

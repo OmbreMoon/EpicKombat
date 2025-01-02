@@ -19,8 +19,6 @@ import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.weaponinnate.SimpleWeaponInnateSkill;
-import yesman.epicfight.skill.weaponinnate.WeaponInnateSkill;
 import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.StunType;
@@ -42,9 +40,9 @@ public class EpicKombatSkills {
 
         COMBO_BASIC_ATTACK = registry.build("combo_basic_attack", ComboBasicAttack::new, ComboBasicAttack.createComboBasicAttackBuilder());
 
-        LIU_KANG = registry.build("liu_kang", LiuKangSkill::new, FighterSkill.createFighterBuilder().setFighterInfo(CommonClass.customLocation("liu_kang")));
-        SUB_ZERO = registry.build("sub_zero", SubZeroSkill::new, FighterSkill.createFighterBuilder().setFighterInfo(CommonClass.customLocation("sub_zero")));
-        SCORPION = registry.build("scorpion", ScorpionSkill::new, FighterSkill.createFighterBuilder().setFighterInfo(CommonClass.customLocation("scorpion")));
+        LIU_KANG = registry.build("liu_kang", LiuKangSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("liu_kang")));
+        SUB_ZERO = registry.build("sub_zero", SubZeroSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("sub_zero")));
+        SCORPION = registry.build("scorpion", ScorpionSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("scorpion")));
 
         SpecialSkill test = registry.build("test", TestSpecial::new, TestSpecial.createSimpleSpecialBuilder().setAnimations(() -> (AttackAnimation) Animations.THE_GUILLOTINE));
         test.newProperty()

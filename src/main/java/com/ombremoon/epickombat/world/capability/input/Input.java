@@ -1,11 +1,13 @@
 package com.ombremoon.epickombat.world.capability.input;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class Input {
+    public static final Input EMPTY = new Input();
     public static final Input W = new Input("w", true);
     public static final Input A = new Input("a", true);
     public static final Input S = new Input("s", true);
@@ -42,15 +44,15 @@ public class Input {
 
     public Input append(List<Input> inputs) {
         Input input = this;
-        if (input.size >= 4) return input;
+        if (input.size >= 5) return input;
 
-        if (inputs.size() > 4 || input.size + inputs.size() > 4)
-            throw new IllegalArgumentException("Input length (" + inputs.size() + ") must not exceed max input length (4).");
+        if (inputs.size() > 5 || input.size + inputs.size() > 5)
+            throw new IllegalArgumentException("Input length (" + inputs.size() + ") must not exceed max input length (5).");
 
         StringBuilder s = new StringBuilder(this.input);
         boolean isMovement = true;
         for (Input value : inputs) {
-            if (value.size + input.size > 4)
+            if (value.size + input.size > 5)
                 throw new IllegalArgumentException("Cannot append input of size " + value.size + "to input of size " + input.size);
 
             s.append(value.input);
@@ -68,7 +70,7 @@ public class Input {
     }
 
     public boolean canAppend(Input input) {
-        return this.size + input.size <= 4;
+        return this.size + input.size <= 5;
     }
 
     public boolean isPartialMatch(Input input) {
@@ -127,14 +129,14 @@ public class Input {
         }
     }
 
-    public void write(FriendlyByteBuf buf) {
-        buf.writeUtf(this.input);
+    public void write(ByteBuf buf) {
+        ((FriendlyByteBuf)buf).writeUtf(this.input);
         buf.writeBoolean(this.isMovement);
         buf.writeInt(this.size);
     }
 
-    public static Input read(FriendlyByteBuf buf) {
-        return new Input(buf.readUtf(), buf.readBoolean(), buf.readInt());
+    public static Input read(ByteBuf buf) {
+        return new Input(((FriendlyByteBuf)buf).readUtf(), buf.readBoolean(), buf.readInt());
     }
 
     public enum Timing {

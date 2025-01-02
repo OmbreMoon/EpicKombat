@@ -1,5 +1,6 @@
 package com.ombremoon.epickombat.world.item;
 
+import com.google.common.collect.Lists;
 import com.ombremoon.epickombat.main.Constants;
 import com.ombremoon.epickombat.skill.KombatSlots;
 import com.ombremoon.epickombat.util.KombatUtil;
@@ -15,6 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+
+import java.util.List;
 
 public class DebugItem extends Item {
     public DebugItem(Properties pProperties) {
