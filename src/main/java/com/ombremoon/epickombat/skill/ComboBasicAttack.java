@@ -119,6 +119,7 @@ public class ComboBasicAttack extends Skill {
                     if (comboInput.equals(playerInput)) {
                         attackMotion = combo.animation().get();
                     } else {
+                        //RESET READER ALWAYS
                         NetworkManager.clearCache(player);
                     }
                     Constants.LOG.debug("{}", combo);

@@ -3,6 +3,7 @@ package com.ombremoon.epickombat.networking.client;
 import com.ombremoon.epickombat.util.KombatUtil;
 import com.ombremoon.epickombat.world.capability.KombatKapability;
 import com.ombremoon.epickombat.world.capability.input.InputCache;
+import com.ombremoon.epickombat.world.capability.input.InputReader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -30,7 +31,9 @@ public class ClientboundClearCache {
             if (handler instanceof ClientGamePacketListener) {
                 Player player = Minecraft.getInstance().player;
                 KombatKapability kombat = KombatUtil.getKombat(player);
-                InputCache cache = kombat.getInputs().cache;
+                InputReader inputs = kombat.getInputs();
+                InputCache cache = inputs.cache;
+                inputs.reset(true);
                 cache.clearCache();
             }
         });

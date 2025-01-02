@@ -54,6 +54,8 @@ public class InputReader {
     }
 
     public void tick() {
+        Constants.LOG.debug("{}", cache.size());
+//        cache.clearCache();
         if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
             return;
 
@@ -78,7 +80,9 @@ public class InputReader {
                     this.updateString();
 
                     if (!this.firstInput.isMovement()) {
-                        if (this.inputId < 2 && !this.prevInput.equals(this.currentInput)) {
+                        if (this.inputId < 2) {
+                            //FIND FIX FOR DOUBLE CALL
+                            Constants.LOG.debug("{}", this.inputId);
                             if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, engine).isExecutable())
                                 playerPatch.getOriginal().resetAttackStrengthTicker();
 
@@ -89,7 +93,7 @@ public class InputReader {
                             this.handleMovementInputs();
                     }
 
-                    Constants.LOG.debug("Input: {}", this.currentInput.isEmpty());
+//                    Constants.LOG.debug("Input: {}", this.currentInput.isEmpty());
                     if (this.currentInput.isEmpty() || this.currentInput.equals(this.prevInput)) {
                         this.reset(true);
                         return;
@@ -182,10 +186,10 @@ public class InputReader {
             this.currentInput = this.currentInput.append(input);
             this.cache.cacheInput(input);
             playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
-            this.inputId++;
         } else {
             this.currentInput.clear();
         }
+        this.inputId++;
         this.initString = false;
     }
 
@@ -214,8 +218,6 @@ public class InputReader {
     private void pressKey(KeyMapping key, Input input, boolean startWindow) {
         boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
         while (keyPressed(key)) {
-//            Constants.LOG.debug("{}", this.tickSinceLastInput);
-
             int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
             if (this.tickSinceLastInput >= timing)
                 this.reset(true);
