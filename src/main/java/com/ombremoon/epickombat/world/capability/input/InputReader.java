@@ -54,13 +54,13 @@ public class InputReader {
     }
 
     public void tick() {
-        Constants.LOG.debug("{}", cache.size());
+//        Constants.LOG.debug("{}", cache.size());
 //        cache.clearCache();
         if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
             return;
 
         int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
-        if (this.tickWindows) {
+        if (this.tickWindows && inputTimer <= 0) {
             this.tickSinceLastInput++;
 
             if (this.tickSinceLastInput >= timing)
@@ -76,13 +76,14 @@ public class InputReader {
                     return;
                 }
 
+                Constants.LOG.debug("{}", this.initString);
                 if (this.tickSinceLastInput == timing || flag) {
                     this.updateString();
 
                     if (!this.firstInput.isMovement()) {
                         if (this.inputId < 2) {
                             //FIND FIX FOR DOUBLE CALL
-                            Constants.LOG.debug("{}", this.inputId);
+                            Constants.LOG.debug("Time: {}", this.tickSinceLastInput);
                             if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, engine).isExecutable())
                                 playerPatch.getOriginal().resetAttackStrengthTicker();
 
@@ -104,6 +105,7 @@ public class InputReader {
                         this.prevInput = this.currentInput;
                         this.activeWindow = true;
                         this.reset();
+                        return;
                     }
                 }
             } else {
@@ -122,6 +124,8 @@ public class InputReader {
         }
 
         this.validateInputs();
+        if (this.inputTimer > 0)
+            this.inputTimer--;
     }
 
     private void handleMovementInputs() {
@@ -291,6 +295,7 @@ public class InputReader {
             this.tickWindows = false;
             this.clearStrings();
             this.inputId = 0;
+            this.inputTimer = 10;
         }
     }
 
