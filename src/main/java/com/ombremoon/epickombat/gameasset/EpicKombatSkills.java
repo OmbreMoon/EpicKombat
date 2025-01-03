@@ -7,6 +7,7 @@ import com.ombremoon.epickombat.skill.fighter.FighterSkill;
 import com.ombremoon.epickombat.skill.fighter.LiuKangSkill;
 import com.ombremoon.epickombat.skill.fighter.ScorpionSkill;
 import com.ombremoon.epickombat.skill.fighter.SubZeroSkill;
+import com.ombremoon.epickombat.skill.guard.HandGuardSkill;
 import com.ombremoon.epickombat.skill.special.SimpleSpecialSkill;
 import com.ombremoon.epickombat.skill.special.SpecialSkill;
 import com.ombremoon.epickombat.skill.special.TestSpecial;
@@ -28,6 +29,7 @@ import java.util.Set;
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EpicKombatSkills {
     public static Skill COMBO_BASIC_ATTACK;
+    public static Skill HAND_GUARD;
     public static Skill LIU_KANG;
     public static Skill SUB_ZERO;
     public static Skill SCORPION;
@@ -39,6 +41,7 @@ public class EpicKombatSkills {
         SkillBuildEvent.ModRegistryWorker registry = event.createRegistryWorker(Constants.MOD_ID);
 
         COMBO_BASIC_ATTACK = registry.build("combo_basic_attack", ComboBasicAttack::new, ComboBasicAttack.createComboBasicAttackBuilder());
+        HAND_GUARD = registry.build("hand_guard", HandGuardSkill::new, HandGuardSkill.createGuardBuilder());
 
         LIU_KANG = registry.build("liu_kang", LiuKangSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("liu_kang")));
         SUB_ZERO = registry.build("sub_zero", SubZeroSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("sub_zero")));

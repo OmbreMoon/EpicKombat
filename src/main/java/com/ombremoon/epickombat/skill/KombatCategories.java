@@ -7,7 +7,7 @@ public enum KombatCategories implements SkillCategory {
     BASIC(false, false, false),
     SPECIAL(false, false, false),
     FINISHER(false, false, false),
-    TAUNT(true, false, false);
+    HAND_GUARD(false, false, false);
 
     final boolean shouldSave;
     final boolean shouldSynchronize;

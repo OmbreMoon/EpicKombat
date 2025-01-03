@@ -14,9 +14,10 @@ public class ClientEvents {
         @SubscribeEvent
         public static void onKeyRegister(RegisterKeyMappingsEvent event) {
             event.register(KeyBinds.FRONT_PUNCH_BINDING);
-            event.register(KeyBinds.BACK_PUNCH_BINDING);
-            event.register(KeyBinds.FRONT_KICK_BINDING);
-            event.register(KeyBinds.BACK_KICK_BINDING);
+//            event.register(KeyBinds.BACK_PUNCH_BINDING);
+//            event.register(KeyBinds.FRONT_KICK_BINDING);
+//            event.register(KeyBinds.BACK_KICK_BINDING);
+//            event.register(KeyBinds.GUARD_BINDING);
         }
     }
 

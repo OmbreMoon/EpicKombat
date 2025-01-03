@@ -3,5 +3,11 @@
   "epicfight.skill_slot.fighter": "Fighter",
   "skill.epickombat.liu_kang": "Liu Kang",
   "skill.epickombat.scorpion": "Scorpion",
-  "skill.epickombat.sub_zero": "Sub-Zero"
+  "skill.epickombat.sub_zero": "Sub-Zero",
+
+  "key.epickombat.front_punch": "Front Punch",
+  "key.epickombat.back_punch": "Back Punch",
+  "key.epickombat.front_kick": "Front Kick",
+  "key.epickombat.back_kick": "Back Kick",
+  "key.epickombat.block": "Block"
 }

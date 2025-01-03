@@ -1,6 +1,7 @@
 package com.ombremoon.epickombat.skill;
 
 import com.ombremoon.epickombat.main.Constants;
+import com.ombremoon.epickombat.skill.guard.HandGuardSkill;
 import com.ombremoon.epickombat.world.capability.input.Input;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -14,6 +15,8 @@ public class EpicKombatDataKeys {
     public static final RegistryObject<SkillDataKey<Integer>> COMBO_COUNTER = DATA_KEYS.register("combo_counter", () -> SkillDataKey.createIntKey(0, false, ComboBasicAttack.class));
     public static final RegistryObject<SkillDataKey<Boolean>> BASIC_ATTACK_ACTIVATE = DATA_KEYS.register("basic_attack_activate", () -> SkillDataKey.createBooleanKey(false, false, ComboBasicAttack.class));
     public static final RegistryObject<SkillDataKey<Input>> FIRST_INPUT = DATA_KEYS.register("first_input", () -> createInputKey(Input.EMPTY, false, ComboBasicAttack.class));
+    public static final RegistryObject<SkillDataKey<Integer>> PENALTY_RESTORE_COUNTER = DATA_KEYS.register("penalty_restore_counter", () -> SkillDataKey.createIntKey(0, false, HandGuardSkill.class));
+    public static final RegistryObject<SkillDataKey<Float>> PENALTY = DATA_KEYS.register("penalty", () -> SkillDataKey.createFloatKey(0, false, HandGuardSkill.class));
 
     public static SkillDataKey<Input> createInputKey(Input defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
         return SkillDataKey.createSkillDataKey((byteBuf, input) -> {

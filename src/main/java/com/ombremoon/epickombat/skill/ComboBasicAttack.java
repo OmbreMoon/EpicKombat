@@ -165,6 +165,7 @@ public class ComboBasicAttack extends Skill {
     public void updateContainer(SkillContainer container) {
         if (!container.getExecuter().isLogicalClient() && container.getExecuter().getTickSinceLastAction() > 16 && container.getDataManager().getDataValue(EpicKombatDataKeys.COMBO_COUNTER.get()) > 0) {
             setComboCounterWithEvent(ComboCounterHandleEvent.Causal.TIME_EXPIRED, (ServerPlayerPatch)container.getExecuter(), container, null, 0);
+            NetworkManager.clearCache((ServerPlayer) container.getExecuter().getOriginal());
         }
     }
 }

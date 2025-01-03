@@ -8,7 +8,7 @@ public enum KombatSlots implements SkillSlot {
     BASIC(KombatCategories.BASIC),
     SPECIAL(KombatCategories.SPECIAL),
     FINISHER(KombatCategories.FINISHER),
-    TAUNT(KombatCategories.TAUNT);
+    HAND_GUARD(KombatCategories.HAND_GUARD);
 
     final SkillCategory category;
     final int id;

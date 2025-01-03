@@ -48,8 +48,10 @@ public class KombatKapability {
         if (isClientSide())
             this.inputReader = new InputReader(Minecraft.getInstance());
 
-        if (playerPatch.getSkill(KombatSlots.FIGHTER) != null)
+        if (playerPatch.getSkill(KombatSlots.FIGHTER) != null) {
             playerPatch.getSkill(KombatSlots.BASIC).setSkill(EpicKombatSkills.COMBO_BASIC_ATTACK);
+            playerPatch.getSkill(KombatSlots.HAND_GUARD).setSkill(EpicKombatSkills.HAND_GUARD);
+        }
 
         this.initialized = true;
     }

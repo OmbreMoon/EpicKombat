@@ -54,7 +54,7 @@ public class InputReader {
     }
 
     public void tick() {
-//        Constants.LOG.debug("{}", cache.size());
+        Constants.LOG.debug("{}", cache.size());
 //        cache.clearCache();
         if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
             return;
@@ -136,6 +136,7 @@ public class InputReader {
         if (this.currentInput.getInput().equalsIgnoreCase("cccc")) {
             playerPatch.playAnimationClientPreemptive(kombat.getFighter().getTaunt(playerPatch.getOriginal()), 0.0F);
             this.reset(true);
+            this.cache.clearCache();
         }
 
         boolean foundMatch = false;
@@ -202,7 +203,7 @@ public class InputReader {
         pressKey(KeyBinds.FRONT_PUNCH_BINDING, Input.FP, startString);
         pressKey(KeyBinds.BACK_PUNCH_BINDING, Input.BP, startString);
         pressKey(KeyBinds.FRONT_KICK_BINDING, Input.FK, startString);
-        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString);
+//        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString);
         pressKey(options.keyUp, Input.W, startString);
         pressKey(options.keyLeft, Input.A, startString);
         pressKey(options.keyDown, Input.S, startString);
@@ -330,6 +331,6 @@ public class InputReader {
         COMBAT_MAPPINGS.add(KeyBinds.FRONT_PUNCH_BINDING);
         COMBAT_MAPPINGS.add(KeyBinds.BACK_PUNCH_BINDING);
         COMBAT_MAPPINGS.add(KeyBinds.FRONT_KICK_BINDING);
-        COMBAT_MAPPINGS.add(KeyBinds.BACK_KICK_BINDING);
+//        COMBAT_MAPPINGS.add(KeyBinds.BACK_KICK_BINDING);
     }
 }

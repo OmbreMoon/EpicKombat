@@ -32,5 +32,5 @@ public class FighterPresets {
                             new Combo("clammy_palm", () -> Animations.RUSHING_TEMPO1),
                             new Combo("lin_kuei_storm", () -> Animations.RUSHING_TEMPO2, List.of(Input.BP)),
                             new Combo("arctic_hammer", () -> Animations.DAGGER_AUTO2, List.of(Input.BP, Input.BP)))
-                    .tauntMotions(() -> Animations.AXE_AUTO1, () -> Animations.AXE_AUTO2);
+                    .tauntMotions(() -> Animations.BATTOJUTSU, () -> Animations.METEOR_SLAM);
 }
