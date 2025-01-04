@@ -54,6 +54,7 @@ public class InputReader {
     }
 
     public void tick() {
+//        Constants.LOG.debug("{}", tickSinceLastInput);
         Constants.LOG.debug("{}", cache.size());
 //        cache.clearCache();
         if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
@@ -66,24 +67,21 @@ public class InputReader {
             if (this.tickSinceLastInput >= timing)
                 this.activeWindow = false;
 
-            boolean flag = this.initString && this.tickSinceLastInput == 1;
+            boolean flag = this.initString/* && this.tickSinceLastInput == 1*/;
             if (!this.activeWindow || flag) {
                 if (this.firstInput.isEmpty())
                     this.firstInput = this.createString();
 
-                if (this.firstInput.equals(Input.W) || this.firstInput.equals(Input.S)) {
+                if (this.firstInput.equals(Input.W) || this.firstInput.equals(Input.S) || this.firstInput.equals(Input.JUMP)) {
                     this.reset(true);
                     return;
                 }
 
-                Constants.LOG.debug("{}", this.initString);
                 if (this.tickSinceLastInput == timing || flag) {
                     this.updateString();
 
                     if (!this.firstInput.isMovement()) {
                         if (this.inputId < 2) {
-                            //FIND FIX FOR DOUBLE CALL
-                            Constants.LOG.debug("Time: {}", this.tickSinceLastInput);
                             if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, engine).isExecutable())
                                 playerPatch.getOriginal().resetAttackStrengthTicker();
 
@@ -94,7 +92,6 @@ public class InputReader {
                             this.handleMovementInputs();
                     }
 
-//                    Constants.LOG.debug("Input: {}", this.currentInput.isEmpty());
                     if (this.currentInput.isEmpty() || this.currentInput.equals(this.prevInput)) {
                         this.reset(true);
                         return;
@@ -203,7 +200,7 @@ public class InputReader {
         pressKey(KeyBinds.FRONT_PUNCH_BINDING, Input.FP, startString);
         pressKey(KeyBinds.BACK_PUNCH_BINDING, Input.BP, startString);
         pressKey(KeyBinds.FRONT_KICK_BINDING, Input.FK, startString);
-//        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString);
+        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString);
         pressKey(options.keyUp, Input.W, startString);
         pressKey(options.keyLeft, Input.A, startString);
         pressKey(options.keyDown, Input.S, startString);
@@ -222,10 +219,14 @@ public class InputReader {
 
     private void pressKey(KeyMapping key, Input input, boolean startWindow) {
         boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
+
         while (keyPressed(key)) {
+            Constants.LOG.debug("{} {}", this.tickSinceLastInput, input);
             int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
-            if (this.tickSinceLastInput >= timing)
+            if (this.tickSinceLastInput >= timing) {
                 this.reset(true);
+                Constants.LOG.debug("LARVA");
+            }
 
             if (startWindow && flag) {
                 this.tickWindows = true;
@@ -296,7 +297,7 @@ public class InputReader {
             this.tickWindows = false;
             this.clearStrings();
             this.inputId = 0;
-            this.inputTimer = 10;
+            this.inputTimer = 3;
         }
     }
 
@@ -331,6 +332,6 @@ public class InputReader {
         COMBAT_MAPPINGS.add(KeyBinds.FRONT_PUNCH_BINDING);
         COMBAT_MAPPINGS.add(KeyBinds.BACK_PUNCH_BINDING);
         COMBAT_MAPPINGS.add(KeyBinds.FRONT_KICK_BINDING);
-//        COMBAT_MAPPINGS.add(KeyBinds.BACK_KICK_BINDING);
+        COMBAT_MAPPINGS.add(KeyBinds.BACK_KICK_BINDING);
     }
 }

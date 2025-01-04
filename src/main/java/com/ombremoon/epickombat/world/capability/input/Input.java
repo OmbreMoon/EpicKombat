@@ -1,10 +1,14 @@
 package com.ombremoon.epickombat.world.capability.input;
 
+import com.ombremoon.epickombat.main.Constants;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 
+import java.nio.CharBuffer;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Input {
     public static final Input EMPTY = new Input();
@@ -112,7 +116,18 @@ public class Input {
     public static String sortString(String inputString) {
         char[] charArray = inputString.toCharArray();
         Arrays.sort(charArray);
-        return new String(charArray);
+        Set<Character> set = new HashSet<>();
+
+        for (char c : charArray) {
+            set.add(c);
+        }
+
+        char[] newCharArray = new char[set.size()];
+        int i = 0;
+        for (char c : set) {
+            newCharArray[i++] = c;
+        }
+        return new String(newCharArray);
     }
 
     @Override
@@ -140,9 +155,9 @@ public class Input {
     }
 
     public enum Timing {
-        SHORT(2),
-        MEDIUM(3),
-        LONG(4);
+        SHORT(3),
+        MEDIUM(4),
+        LONG(5);
 
         int duration;
 

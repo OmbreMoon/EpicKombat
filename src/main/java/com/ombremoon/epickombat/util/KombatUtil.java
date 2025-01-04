@@ -13,7 +13,7 @@ public class KombatUtil {
 
     public static boolean hasFighterWeapon(Player player) {
         Fighter fighter = getKombat(player).getFighter();
-        return (fighter.requiresWeaponToFight() && player.getMainHandItem().is(fighter.getRequiredWeapon())) || (!fighter.requiresWeaponToFight() && player.getMainHandItem().isEmpty());
+        return fighter != null && ((fighter.requiresWeaponToFight() && player.getMainHandItem().is(fighter.getRequiredWeapon())) || (!fighter.requiresWeaponToFight() && player.getMainHandItem().isEmpty()));
     }
 
     public static Fighter getFighter(Player player) {

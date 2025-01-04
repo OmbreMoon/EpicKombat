@@ -25,7 +25,7 @@ public class KeyBinds {
     public static final KeyMapping BACK_KICK_BINDING = new KeyMapping(KEY_BACK_KICK, KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, KEY_CATEGORY_EK);
 
-//    public static final KeyMapping GUARD_BINDING = new KeyMapping(KEY_GUARD, KeyConflictContext.IN_GAME,
-//            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, KEY_CATEGORY_EK);
+    public static final KeyMapping GUARD_BINDING = new KeyMapping(KEY_GUARD, KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, KEY_CATEGORY_EK);
 
 }

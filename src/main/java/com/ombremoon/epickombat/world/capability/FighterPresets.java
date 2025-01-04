@@ -1,5 +1,6 @@
 package com.ombremoon.epickombat.world.capability;
 
+import com.ombremoon.epickombat.gameasset.EpicKombatAnimations;
 import com.ombremoon.epickombat.gameasset.EpicKombatSkills;
 import com.ombremoon.epickombat.main.CommonClass;
 import com.ombremoon.epickombat.world.capability.input.Combo;
@@ -29,8 +30,12 @@ public class FighterPresets {
                             new SkillCombo("test", EpicKombatSkills.TEST_SPECIAL, List.of(Input.D, Input.A)),
                             new SkillCombo("test1", EpicKombatSkills.TEST_SPECIAL1, List.of(Input.S, Input.FP)))
                     .addBasicCombo(Input.FP,
-                            new Combo("clammy_palm", () -> Animations.RUSHING_TEMPO1),
-                            new Combo("lin_kuei_storm", () -> Animations.RUSHING_TEMPO2, List.of(Input.BP)),
-                            new Combo("arctic_hammer", () -> Animations.DAGGER_AUTO2, List.of(Input.BP, Input.BP)))
+                            new Combo("clammy_palm", () -> EpicKombatAnimations.RUSHING_TEMPO1),
+                            new Combo("lin_kuei_storm", () -> EpicKombatAnimations.RUSHING_TEMPO2, List.of(Input.BP)),
+                            new Combo("arctic_hammer", () -> EpicKombatAnimations.RUSHING_TEMPO3, List.of(Input.BP, Input.BP)))
+                    .addBasicCombo(Input.BP,
+                            new Combo("quick_chill", () -> EpicKombatAnimations.UCHIGATANA_AUTO1),
+                            new Combo("blistering_blizzard", () -> EpicKombatAnimations.UCHIGATANA_AUTO2, List.of(Input.FP)),
+                            new Combo("whiteout", () -> EpicKombatAnimations.UCHIGATANA_AUTO3, List.of(Input.FP, Input.BP)))
                     .tauntMotions(() -> Animations.BATTOJUTSU, () -> Animations.METEOR_SLAM);
 }
