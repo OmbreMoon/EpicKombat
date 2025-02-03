@@ -3,10 +3,10 @@ package com.ombremoon.epickombat.gameasset;
 import com.ombremoon.epickombat.api.animation.types.ComboAttackAnimation;
 import com.ombremoon.epickombat.api.animation.types.ComboBasicAttackAnimation;
 import com.ombremoon.epickombat.main.Constants;
+import net.minecraft.world.InteractionHand;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
@@ -15,6 +15,9 @@ import yesman.epicfight.model.armature.HumanoidArmature;
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EpicKombatAnimations {
+    public static StaticAnimation RAIDEN_IDLE;
+    public static StaticAnimation ELECTRIC_TIPS;
+    public static StaticAnimation WARRIOR_STANCE;
     public static StaticAnimation RUSHING_TEMPO1;
     public static StaticAnimation RUSHING_TEMPO2;
     public static StaticAnimation RUSHING_TEMPO3;
@@ -30,6 +33,11 @@ public class EpicKombatAnimations {
     private static void build() {
         HumanoidArmature biped = Armatures.BIPED;
 
+        RAIDEN_IDLE = new StaticAnimation(true, "biped/living/raiden_idle", biped);
+        ELECTRIC_TIPS = new ComboBasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, biped.toolR, "biped/combat/electric_tips", biped)
+                .addProperty(AnimationProperty.AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.6F);
+        WARRIOR_STANCE = new ComboBasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, biped.toolR, "biped/combat/warrior_stance", biped)
+                .addProperty(AnimationProperty.AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.6F);
         RUSHING_TEMPO1 = new ComboAttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo1", biped)
                 .addProperty(AnimationProperty.AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
                 .addProperty(AnimationProperty.AttackAnimationProperty.EXTRA_COLLIDERS, 2)

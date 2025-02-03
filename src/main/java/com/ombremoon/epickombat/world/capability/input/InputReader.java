@@ -12,6 +12,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.InputEvent;
@@ -55,7 +56,7 @@ public class InputReader {
 
     public void tick() {
 //        Constants.LOG.debug("{}", tickSinceLastInput);
-        Constants.LOG.debug("{}", cache.size());
+//        Constants.LOG.debug("{}", cache.size());
 //        cache.clearCache();
         if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
             return;

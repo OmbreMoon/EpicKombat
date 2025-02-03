@@ -19,8 +19,11 @@ public class FighterReloadListener extends SimpleJsonResourceReloadListener {
     public static void registerDefaultFighters() {
         Map<ResourceLocation, Fighter.Builder> map = Maps.newHashMap();
         map.put(CommonClass.customLocation("liu_kang"), FighterPresets.LIU_KANG);
-        map.put(CommonClass.customLocation("scorpion"), FighterPresets.SCORPION);
         map.put(CommonClass.customLocation("sub_zero"), FighterPresets.SUB_ZERO);
+        map.put(CommonClass.customLocation("scorpion"), FighterPresets.SCORPION);
+        map.put(CommonClass.customLocation("raiden"), FighterPresets.RAIDEN);
+        map.put(CommonClass.customLocation("johnny_cage"), FighterPresets.JOHNNY_CAGE);
+        map.put(CommonClass.customLocation("kitana"), FighterPresets.KITANA);
 
         FighterPresetRegistryEvent event = new FighterPresetRegistryEvent(map);
         ModLoader.get().postEvent(event);

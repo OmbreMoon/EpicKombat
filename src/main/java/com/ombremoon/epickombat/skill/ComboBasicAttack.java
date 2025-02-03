@@ -1,6 +1,5 @@
 package com.ombremoon.epickombat.skill;
 
-import com.ombremoon.epickombat.main.Constants;
 import com.ombremoon.epickombat.networking.NetworkManager;
 import com.ombremoon.epickombat.util.KombatUtil;
 import com.ombremoon.epickombat.world.capability.Fighter;
@@ -70,6 +69,9 @@ public class ComboBasicAttack extends Skill {
                 }
             }
         });
+        container.getExecuter().getEventListener().addEventListener(PlayerEventListener.EventType.HURT_EVENT_POST, EVENT_UUID, event -> {
+
+        });
     }
 
     @Override
@@ -121,7 +123,6 @@ public class ComboBasicAttack extends Skill {
                     } else {
                         NetworkManager.clearCache(player);
                     }
-//                    Constants.LOG.debug("{}", combo);
                 }
             } else {
                 attackMotion = combo.animation().get();

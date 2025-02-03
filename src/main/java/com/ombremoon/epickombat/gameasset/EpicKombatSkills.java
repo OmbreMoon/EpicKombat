@@ -3,10 +3,7 @@ package com.ombremoon.epickombat.gameasset;
 import com.ombremoon.epickombat.main.CommonClass;
 import com.ombremoon.epickombat.main.Constants;
 import com.ombremoon.epickombat.skill.ComboBasicAttack;
-import com.ombremoon.epickombat.skill.fighter.FighterSkill;
-import com.ombremoon.epickombat.skill.fighter.LiuKangSkill;
-import com.ombremoon.epickombat.skill.fighter.ScorpionSkill;
-import com.ombremoon.epickombat.skill.fighter.SubZeroSkill;
+import com.ombremoon.epickombat.skill.fighter.*;
 import com.ombremoon.epickombat.skill.guard.HandGuardSkill;
 import com.ombremoon.epickombat.skill.special.SimpleSpecialSkill;
 import com.ombremoon.epickombat.skill.special.SpecialSkill;
@@ -33,6 +30,9 @@ public class EpicKombatSkills {
     public static Skill LIU_KANG;
     public static Skill SUB_ZERO;
     public static Skill SCORPION;
+    public static Skill RAIDEN;
+    public static Skill JOHNNY_CAGE;
+    public static Skill KITANA;
     public static Skill TEST_SPECIAL;
     public static Skill TEST_SPECIAL1;
 
@@ -46,6 +46,9 @@ public class EpicKombatSkills {
         LIU_KANG = registry.build("liu_kang", LiuKangSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("liu_kang")));
         SUB_ZERO = registry.build("sub_zero", SubZeroSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("sub_zero")));
         SCORPION = registry.build("scorpion", ScorpionSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("scorpion")));
+        RAIDEN = registry.build("raiden", RaidenSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("raiden")));
+        JOHNNY_CAGE = registry.build("johnny_cage", JohnnyCageSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("johnny_cage")));
+        KITANA = registry.build("kitana", KitanaSkill::new, FighterSkill.createFighterBuilder().setFighter(CommonClass.customLocation("kitana")));
 
         SpecialSkill test = registry.build("test", TestSpecial::new, TestSpecial.createSimpleSpecialBuilder().setAnimations(() -> (AttackAnimation) Animations.THE_GUILLOTINE));
         test.newProperty()

@@ -1,6 +1,7 @@
 package com.ombremoon.epickombat.events;
 
 import com.ombremoon.epickombat.main.Constants;
+import com.ombremoon.epickombat.skill.KombatSlots;
 import com.ombremoon.epickombat.world.capability.KombatKapabilityProvider;
 import com.ombremoon.epickombat.util.KombatUtil;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +12,8 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID)
