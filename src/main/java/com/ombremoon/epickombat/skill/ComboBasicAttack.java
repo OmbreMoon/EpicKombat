@@ -3,18 +3,13 @@ package com.ombremoon.epickombat.skill;
 import com.ombremoon.epickombat.networking.NetworkManager;
 import com.ombremoon.epickombat.util.KombatUtil;
 import com.ombremoon.epickombat.world.capability.Fighter;
-import com.ombremoon.epickombat.world.capability.KombatKapability;
-import com.ombremoon.epickombat.world.capability.input.Combo;
-import com.ombremoon.epickombat.world.capability.input.Input;
-import com.ombremoon.epickombat.world.capability.input.InputCache;
-import com.ombremoon.epickombat.world.capability.input.InputReader;
+import com.ombremoon.epickombat.world.capability.input.*;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.skill.Skill;
@@ -54,23 +49,6 @@ public class ComboBasicAttack extends Skill {
         super.onInitiate(container);
         container.getExecuter().getEventListener().addEventListener(PlayerEventListener.EventType.ANIMATION_END_EVENT, EVENT_UUID, event -> {
             container.getDataManager().setData(EpicKombatDataKeys.BASIC_ATTACK_ACTIVATE.get(), false);
-            if (event.isEnd() && container.getExecuter().isLogicalClient()) {
-                KombatKapability kombat = KombatUtil.getKombat(event.getPlayerPatch().getOriginal());
-                InputReader inputs = kombat.getInputs();
-                InputCache cache = inputs.getCache();
-                int comboCounter = container.getDataManager().getDataValue(EpicKombatDataKeys.COMBO_COUNTER.get());
-                if (comboCounter < cache.size()) {
-                    LocalPlayerPatch playerPatch = (LocalPlayerPatch) event.getPlayerPatch();
-                    if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, ClientEngine.getInstance().controllEngine).isExecutable())
-                        playerPatch.getOriginal().resetAttackStrengthTicker();
-                } else {
-                    inputs.reset(true);
-                    cache.clearCache();
-                }
-            }
-        });
-        container.getExecuter().getEventListener().addEventListener(PlayerEventListener.EventType.HURT_EVENT_POST, EVENT_UUID, event -> {
-
         });
     }
 

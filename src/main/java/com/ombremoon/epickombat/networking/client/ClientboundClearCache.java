@@ -6,7 +6,6 @@ import com.ombremoon.epickombat.world.capability.input.InputCache;
 import com.ombremoon.epickombat.world.capability.input.InputReader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
@@ -32,8 +31,8 @@ public class ClientboundClearCache {
                 Player player = Minecraft.getInstance().player;
                 KombatKapability kombat = KombatUtil.getKombat(player);
                 InputReader inputs = kombat.getInputs();
-                InputCache cache = inputs.cache;
-                inputs.reset(true);
+                InputCache cache = inputs.getCache();
+//                inputs.hardReset();
                 cache.clearCache();
             }
         });

@@ -1,18 +1,15 @@
 package com.ombremoon.epickombat.world.capability.input;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.ombremoon.epickombat.client.KeyBinds;
 import com.ombremoon.epickombat.config.ConfigHandler;
 import com.ombremoon.epickombat.main.Constants;
 import com.ombremoon.epickombat.skill.KombatSlots;
 import com.ombremoon.epickombat.util.KombatUtil;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.InputEvent;
@@ -20,235 +17,168 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class InputReader {
-    private static final List<KeyMapping> COMBAT_MAPPINGS = Lists.newArrayList();
+    private static final Map<KeyMapping, Input> COMBAT_MAPPINGS = new Object2ObjectOpenHashMap<>();
     private final Minecraft minecraft;
+    private final LocalPlayer player;
     private final LocalPlayerPatch playerPatch;
     private final ControllEngine engine;
-    public final InputCache cache;
-    private final List<Input> attackInputs = new ObjectArrayList<>();
-    private final Set<Input> directionalInputs = new LinkedHashSet<>();
-    private boolean tickWindows;
-    public int tickSinceLastInput = 0;
-    private boolean activeWindow;
-    private boolean initString;
-    private Input currentInput;
-    private Input prevInput;
-    private Input firstInput;
-    private int inputTimer;
-    private int inputId = 0;
+    private final InputCache cache;
+    private boolean tickWindow;
+    private int ticksSinceLastInput;
+    private boolean addToCache;
 
     public InputReader(Minecraft minecraft) {
         this.minecraft = minecraft;
-        this.playerPatch = EpicFightCapabilities.getEntityPatch(minecraft.player, LocalPlayerPatch.class);
+        this.player = minecraft.player;
+        this.playerPatch = EpicFightCapabilities.getEntityPatch(player, LocalPlayerPatch.class);
         this.engine = ClientEngine.getInstance().controllEngine;
         this.cache = new InputCache(playerPatch);
-        this.currentInput = new Input();
-        this.prevInput = new Input();
-        this.firstInput = new Input();
     }
 
     public void tick() {
-//        Constants.LOG.debug("{}", tickSinceLastInput);
-//        Constants.LOG.debug("{}", cache.size());
-//        cache.clearCache();
-        if (playerPatch.getSkill(KombatSlots.FIGHTER) == null || !playerPatch.isBattleMode())
-            return;
+        Constants.LOG.debug("{}", this.cache);
 
+        //BASIC ATTACK & SPECIAL LOGIC
+
+        boolean flag = true;
         int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
-        if (this.tickWindows && inputTimer <= 0) {
-            this.tickSinceLastInput++;
+        for (var entry : COMBAT_MAPPINGS.entrySet()) {
+            while (keyPressed(entry.getKey(), true)) {
+                if (this.playerPatch.isBattleMode()) {
+                    SkillSlot slot = (!this.player.onGround() && !this.player.isInWater()) ? KombatSlots.AERIAL : KombatSlots.BASIC;
 
-            if (this.tickSinceLastInput >= timing)
-                this.activeWindow = false;
-
-            boolean flag = this.initString/* && this.tickSinceLastInput == 1*/;
-            if (!this.activeWindow || flag) {
-                if (this.firstInput.isEmpty())
-                    this.firstInput = this.createString();
-
-                if (this.firstInput.equals(Input.W) || this.firstInput.equals(Input.S) || this.firstInput.equals(Input.JUMP)) {
-                    this.reset(true);
-                    return;
-                }
-
-                if (this.tickSinceLastInput == timing || flag) {
-                    this.updateString();
-
-                    if (!this.firstInput.isMovement()) {
-                        if (this.inputId < 2) {
-                            if (playerPatch.getSkill(KombatSlots.BASIC).sendExecuteRequest(playerPatch, engine).isExecutable())
-                                playerPatch.getOriginal().resetAttackStrengthTicker();
-
-                            engine.lockHotkeys();
-                        }
+                    this.cache.cacheInput(entry.getValue());
+                    if (this.cache.getFirst().isMovement()) {
+                        this.handleMovementInputs();
+                        flag = false;
                     } else {
-                        if (this.inputId > 2)
-                            this.handleMovementInputs();
+                        if (this.playerPatch.getSkill(slot).sendExecuteRequest(this.playerPatch, this.engine).isExecutable()) {
+                            this.player.resetAttackStrengthTicker();
+                        }
                     }
 
-                    if (this.currentInput.isEmpty() || this.currentInput.equals(this.prevInput)) {
-                        this.reset(true);
-                        return;
-                    }
-
-
-                    if (flag) {
-                        this.prevInput = this.currentInput;
-                        this.activeWindow = true;
-                        this.reset();
-                        return;
-                    }
+                    engine.lockHotkeys();
                 }
-            } else {
-                this.updateInputs(false);
             }
-
-            if (this.tickSinceLastInput >= timing + 1) {
-                if (!this.currentInput.isEmpty()) {
-                    this.activeWindow = true;
-                    this.prevInput = this.currentInput;
-                }
-                this.reset(!this.isWindowActive());
-            }
-        } else {
-            this.updateInputs(true);
         }
 
-        this.validateInputs();
-        if (this.inputTimer > 0)
-            this.inputTimer--;
+        if (!this.cache.isEmpty() && this.cache.getInput().isMovement() && this.cache.size() > 2 && flag)
+            this.handleMovementInputs();
+
+        //KEYBIND HANDLING
+
+        while (keyPressed(this.minecraft.options.keyLeft, false)) {
+            this.cacheInput(Input.A, false);
+        }
+
+        while (keyPressed(this.minecraft.options.keyRight, false)) {
+            this.cacheInput(Input.D, false);
+        }
+
+        while (keyPressed(this.minecraft.options.keyShift, false)) {
+            this.cacheInput(Input.CROUCH, false);
+        }
+
+        while (keyPressed(this.minecraft.options.keyUp, false)) {
+            this.cacheInput(Input.W, true);
+        }
+
+        while (keyPressed(this.minecraft.options.keyDown, false)) {
+            this.cacheInput(Input.S, true);
+        }
+
+        //WINDOW LOGIC
+
+        if (this.tickWindow) {
+            if (this.ticksSinceLastInput == timing && !this.addToCache) {
+                this.ticksSinceLastInput = 0;
+                this.addToCache = true;
+            } else if (this.ticksSinceLastInput > timing) {
+                this.cache.clearCache();
+                this.tickWindow = false;
+                this.addToCache = true;
+                this.ticksSinceLastInput = 0;
+            } else {
+                this.ticksSinceLastInput++;
+            }
+        } else {
+            this.ticksSinceLastInput = 0;
+            this.addToCache = true;
+            if (!this.cache.isEmpty() && this.cache.getFirst().isMovement())
+                this.cache.clearCache();
+        }
+    }
+
+    public InputCache getCache() {
+        return this.cache;
+    }
+
+    private void cacheInput(Input input, boolean mustHaveActiveWindow) {
+        int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
+        if (mustHaveActiveWindow && !this.tickWindow)
+            return;
+
+        if (this.cache.isEmpty() || (this.ticksSinceLastInput < timing && this.addToCache)) {
+            this.cache.cacheInput(input);
+            this.addToCache = false;
+            this.tickWindow = true;
+            this.ticksSinceLastInput = 0;
+        } else if (this.ticksSinceLastInput < timing) {
+            this.cache.appendLast(input);
+        }
     }
 
     private void handleMovementInputs() {
+        Input firstInput = this.cache.getFirst();
+        Input input = this.cache.getInput();
         var kombat = KombatUtil.getKombat(minecraft.player);
-        var combos = KombatUtil.getFighter(minecraft.player).getSpecialCombo(this.firstInput);
+        var combos = KombatUtil.getFighter(minecraft.player).getSpecialCombo(firstInput);
 
-        Constants.LOG.debug("{}", this.currentInput);
-        if (this.currentInput.getInput().equalsIgnoreCase("cccc")) {
+        if (this.cache.getInput().getInput().contains("ccc"))
+            return;
+
+        if (this.cache.getInput().getInput().contains("cccc")) {
             playerPatch.playAnimationClientPreemptive(kombat.getFighter().getTaunt(playerPatch.getOriginal()), 0.0F);
-            this.reset(true);
             this.cache.clearCache();
+            return;
         }
 
-        boolean foundMatch = false;
         for (SkillCombo combo : combos) {
-            Input comboInput = this.firstInput.append(combo.inputs());
-            if (this.currentInput.equals(comboInput)) {
+            Input comboInput = firstInput.append(combo.inputs());
+            if (comboInput.equals(input)) {
                 SkillContainer special = playerPatch.getSkill(KombatSlots.SPECIAL);
                 kombat.changeSpecialSkill(combo.skill());
                 if (special.sendExecuteRequest(playerPatch, engine).isExecutable())
                     engine.lockHotkeys();
 
-                foundMatch = true;
-                this.currentInput.clear();
                 this.cache.clearCache();
-                break;
+                return;
             }
         }
 
-        if (!foundMatch && !this.currentInput.isEmpty()) {
-            for (SkillCombo combo : combos) {
-                Input comboInput = this.firstInput.append(combo.inputs());
-                if (this.currentInput.isPartialMatch(comboInput)) {
-                    foundMatch = true;
-                    break;
-                }
-            }
-
-            if (this.currentInput.getInput().equalsIgnoreCase("ccc"))
-                foundMatch = true;
-        }
-
-        if (!foundMatch)
-            this.reset(true);
-    }
-
-    private Input createString() {
-        Input input = new Input();
-        for (Input dirInput : this.directionalInputs) {
-            input = input.append(dirInput);
-        }
-        for (Input combatInput : this.attackInputs) {
-            input = input.append(combatInput);
-        }
-
-        String s = Input.sortString(input.getInput());
-        return new Input(s, input.isMovement(), input.size());
-    }
-
-    private void updateString() {
-        Input input = this.createString();
-        if (this.currentInput.canAppend(input) && !input.isEmpty()) {
-            this.currentInput = this.currentInput.append(input);
-            this.cache.cacheInput(input);
-            playerPatch.getOriginal().sendSystemMessage(Component.literal(input.getInput()));
-        } else {
-            this.currentInput.clear();
-        }
-        this.inputId++;
-        this.initString = false;
-    }
-
-    private void updateInputs(boolean startString) {
-        Options options = this.minecraft.options;
-        pressKey(KeyBinds.FRONT_PUNCH_BINDING, Input.FP, startString);
-        pressKey(KeyBinds.BACK_PUNCH_BINDING, Input.BP, startString);
-        pressKey(KeyBinds.FRONT_KICK_BINDING, Input.FK, startString);
-        pressKey(KeyBinds.BACK_KICK_BINDING, Input.BK, startString);
-        pressKey(options.keyUp, Input.W, startString);
-        pressKey(options.keyLeft, Input.A, startString);
-        pressKey(options.keyDown, Input.S, startString);
-        pressKey(options.keyRight, Input.D, startString);
-        pressKey(options.keyJump, Input.JUMP, startString);
-        pressKey(options.keyShift, Input.CROUCH, startString);
-    }
-
-    private boolean isHeldInput(List<Input> inputs) {
-        return inputs.size() == 2 && inputs.get(0) == inputs.get(1);
-    }
-
-    public void pressKey(KeyMapping key, Input input) {
-        this.pressKey(key, input, false);
-    }
-
-    private void pressKey(KeyMapping key, Input input, boolean startWindow) {
-        boolean flag = KombatUtil.hasFighterWeapon(playerPatch.getOriginal());
-
-        while (keyPressed(key)) {
-            Constants.LOG.debug("{} {}", this.tickSinceLastInput, input);
-            int timing = ConfigHandler.INPUT_TIMING.get().getDuration();
-            if (this.tickSinceLastInput >= timing) {
-                this.reset(true);
-                Constants.LOG.debug("LARVA");
-            }
-
-            if (startWindow && flag) {
-                this.tickWindows = true;
-                this.activeWindow = true;
-                this.initString = true;
-            }
-
-            if (!flag) break;
-
-            if (input.isMovement()) {
-                this.addDirectionalInput(input);
-            } else {
-                this.addAttackInput(input);
+        for (SkillCombo combo : combos) {
+            Input comboInput = firstInput.append(combo.inputs());
+            if (input.isPartialMatch(comboInput)) {
+                return;
             }
         }
+
+        this.cache.clearCache();
+        this.tickWindow = false;
+        this.ticksSinceLastInput = 0;
+        this.addToCache = true;
     }
 
-    private static boolean keyPressed(KeyMapping key) {
+    private static boolean keyPressed(KeyMapping key, boolean eventCheck) {
         boolean consumes = key.consumeClick();
 
-        if (consumes) {
+        if (consumes && eventCheck) {
             int mouseButton = InputConstants.Type.MOUSE == key.getKey().getType() ? key.getKey().getValue() : -1;
             InputEvent.InteractionKeyMappingTriggered inputEvent = ForgeHooksClient.onClickInput(mouseButton, key, InteractionHand.MAIN_HAND);
 
@@ -260,79 +190,10 @@ public class InputReader {
         return consumes;
     }
 
-    private void addAttackInput(Input input) {
-        if (this.attackInputs.size() >= 2) return;
-        this.attackInputs.add(input);
-    }
-
-    private void addDirectionalInput(Input input) {
-        List<Input> inputs = Lists.newArrayList(this.directionalInputs);
-        if (inputs.size() == 1 && input.isOpposite(inputs.get(0)))
-            this.directionalInputs.clear();
-
-        if (this.directionalInputs.size() < 2)
-            this.directionalInputs.add(input);
-    }
-
-    private void validateInputs() {
-        if (!this.tickWindows && (!this.firstInput.isEmpty() || !this.currentInput.isEmpty() || !this.directionalInputs.isEmpty() || !this.attackInputs.isEmpty())) {
-            this.clearInputs();
-            this.clearStrings();
-        }
-    }
-
-    private void reset() {
-        if (!this.attackInputs.isEmpty()) {
-            for (KeyMapping key : COMBAT_MAPPINGS) {
-                key.release();
-            }
-        }
-
-        this.clearInputs();
-        this.tickSinceLastInput = 0;
-    }
-
-    public void reset(boolean hardReset) {
-        this.reset();
-        if (hardReset) {
-            this.tickWindows = false;
-            this.clearStrings();
-            this.inputId = 0;
-            this.inputTimer = 3;
-        }
-    }
-
-    private void clearInputs() {
-        this.directionalInputs.clear();
-        this.attackInputs.clear();
-    }
-
-    private void clearStrings() {
-        this.currentInput.clear();
-        this.prevInput.clear();
-        this.firstInput.clear();
-    }
-
-    public boolean isWindowActive() {
-        return this.activeWindow;
-    }
-
-    public InputCache getCache() {
-        return this.cache;
-    }
-
-    public Input getCurrentInput() {
-        return this.currentInput;
-    }
-
-    public Input getFirstInput() {
-        return this.firstInput;
-    }
-
     static {
-        COMBAT_MAPPINGS.add(KeyBinds.FRONT_PUNCH_BINDING);
-        COMBAT_MAPPINGS.add(KeyBinds.BACK_PUNCH_BINDING);
-        COMBAT_MAPPINGS.add(KeyBinds.FRONT_KICK_BINDING);
-        COMBAT_MAPPINGS.add(KeyBinds.BACK_KICK_BINDING);
+        COMBAT_MAPPINGS.put(KeyBinds.FRONT_PUNCH_BINDING, Input.FP);
+        COMBAT_MAPPINGS.put(KeyBinds.BACK_PUNCH_BINDING, Input.BP);
+        COMBAT_MAPPINGS.put(KeyBinds.FRONT_KICK_BINDING, Input.FK);
+        COMBAT_MAPPINGS.put(KeyBinds.BACK_KICK_BINDING, Input.BK);
     }
 }

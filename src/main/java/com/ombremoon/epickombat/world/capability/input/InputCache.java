@@ -1,14 +1,11 @@
 package com.ombremoon.epickombat.world.capability.input;
 
-import com.ombremoon.epickombat.skill.ComboBasicAttack;
 import com.ombremoon.epickombat.skill.EpicKombatDataKeys;
 import com.ombremoon.epickombat.skill.KombatSlots;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.FriendlyByteBuf;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class InputCache {
@@ -39,9 +36,18 @@ public class InputCache {
         return this.savedInputs.isEmpty();
     }
 
+    public void appendLast(Input input) {
+        int index = this.savedInputs.size() - 1;
+        this.savedInputs.set(index, this.savedInputs.get(index).append(input));
+    }
+
     public void clearCache() {
         this.savedInputs.clear();
         this.playerPatch.getSkill(KombatSlots.BASIC).getDataManager().setDataSync(EpicKombatDataKeys.FIRST_INPUT.get(), Input.EMPTY, playerPatch.getOriginal());;
+    }
+
+    public Input getInput() {
+        return new Input().append(this.savedInputs);
     }
 
     public void serialize(ByteBuf buf) {
@@ -60,5 +66,10 @@ public class InputCache {
         }
 
         return inputs;
+    }
+
+    @Override
+    public String toString() {
+        return "Cache: " + this.savedInputs;
     }
 }

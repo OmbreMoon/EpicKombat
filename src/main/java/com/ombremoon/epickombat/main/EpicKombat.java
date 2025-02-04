@@ -37,6 +37,7 @@ public class EpicKombat {
         CommonClass.init(modEventBus);
         ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicKombatItems.TAB.get()));
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigHandler.CLIENT_CONFIG, "epickombat-client.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, "epickombat-common.toml");
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

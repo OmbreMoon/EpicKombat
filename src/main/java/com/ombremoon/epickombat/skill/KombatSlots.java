@@ -6,6 +6,7 @@ import yesman.epicfight.skill.SkillSlot;
 public enum KombatSlots implements SkillSlot {
     FIGHTER(KombatCategories.FIGHTER),
     BASIC(KombatCategories.BASIC),
+    AERIAL(KombatCategories.AERIAL),
     SPECIAL(KombatCategories.SPECIAL),
     FINISHER(KombatCategories.FINISHER),
     HAND_GUARD(KombatCategories.HAND_GUARD);

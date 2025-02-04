@@ -5,6 +5,7 @@ import yesman.epicfight.skill.SkillCategory;
 public enum KombatCategories implements SkillCategory {
     FIGHTER(true, true, true),
     BASIC(false, false, false),
+    AERIAL(false, false, false),
     SPECIAL(false, false, false),
     FINISHER(false, false, false),
     HAND_GUARD(false, false, false);

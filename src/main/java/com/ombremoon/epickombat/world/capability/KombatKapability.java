@@ -19,6 +19,7 @@ public class KombatKapability {
     protected PlayerPatch<?> playerPatch;
     protected boolean initialized = false;
     protected Fighter fighter;
+//    private InputReader inputReader;
     private InputReader inputReader;
 
     public KombatKapability() {
@@ -46,6 +47,7 @@ public class KombatKapability {
     public void joinWorld(EntityJoinLevelEvent event) {
         this.playerPatch = EpicFightCapabilities.getEntityPatch(this.player, PlayerPatch.class);
         if (isClientSide())
+//            this.inputReader = new InputReader(Minecraft.getInstance());
             this.inputReader = new InputReader(Minecraft.getInstance());
 
         if (playerPatch.getSkill(KombatSlots.FIGHTER) != null) {
